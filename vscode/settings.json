@@ -1,0 +1,4 @@
+{
+    "workbench.colorTheme": "Default Dark+",
+    "window.title": "${dirty}${activeEditorLong}${separator}${rootName}${separator}${appName}"
+}

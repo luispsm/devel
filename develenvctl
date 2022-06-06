@@ -1,0 +1,93 @@
+#!/bin/bash
+#Action variables
+BUILD=0
+RUN=0
+SHOW_HELP=0
+
+#Config files
+ROOT_DIR=$(dirname $(readlink -f $0))
+DOCKER_DIR="${ROOT_DIR}/docker"
+WORKSPACE="${ROOT_DIR}/workspace"
+
+#Image and container variables
+IMAGE_TAG="devel_image"
+CONTAINER_NAME="devel"
+SSH_PORT=22
+PORT=5000
+VOLUME_MOUNT='/home/user/workspace'
+
+#Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+log_info() {
+   echo -e "${GREEN}[INFO]${NC} $@"
+}
+
+log_error() {
+   echo -e "${RED}[ERROR]${NC} $@"
+}
+
+run_command() {
+   eval $@
+   local ret=$?
+   if [[ $ret -ne 0 ]] ; then
+      log_error "Command: $@"
+   fi
+   return $ret
+}
+
+print_help() {
+   echo -e "Development environment control script\n"
+   echo -e "Usage:\t$0 COMMAND [OPTIONS]\n"
+   echo -e "Commands:"
+   echo -e "  build\t\tBuild devel environment image"
+   echo -e "  run\t\tRun the devel environment container"
+   echo -e "\nbuild options:"
+   echo -e "  -t|--tag)\tAssign image tag. Default ${IMAGE_TAG}"
+   echo -e "\nrun options:"
+   echo -e "  -t|--tag)\tImage tag to be used. Default ${IMAGE_TAG}"
+   echo -e "  -n|--name)\tAssign container name. Default ${CONTAINER_NAME}"
+   echo -e "  -p|--port)\tSSH port forwarding. Default ${PORT}"
+   echo -e "  -v|--vol)\tBinding path. Default ${VOLUME}"
+}
+
+while [[ "$#" -gt 0 ]] ; do
+   case $1 in
+      build ) BUILD=1 ;;
+      run ) RUN=1 ;;
+      -t | --tag ) shift ; IMAGE_TAG=$1 ;;
+      -n | --name ) shift ; CONTAINER_NAME=$1 ;;
+      -p | --port ) shift ; PORT=$1 ;;
+      -v | --vol ) shift ; VOLUME=$1 ;;
+      -h | --help ) SHOW_HELP=1 ;;
+      * ) log_error "Unknown argument $1" ; exit 1 ;;
+   esac
+   shift
+done
+
+if [[ ${SHOW_HELP} -eq 1 ]] ; then
+   print_help
+
+elif [[ ${BUILD} -eq 1 ]] ; then
+   log_info "Starting development environment"
+   CMD="docker build ${DOCKER_DIR} \
+      -t ${IMAGE_TAG}"
+   run_command $CMD
+
+elif [[ ${RUN} -eq 1 ]] ; then
+   log_info "Running container ${CONTAINER_NAME}"
+   CMD="docker container run -d \
+      -p ${PORT}:${SSH_PORT} \
+      --mount type=bind,source=${WORKSPACE},target=${VOLUME_MOUNT} \
+      --name ${CONTAINER_NAME} \
+      ${IMAGE_TAG}"
+   run_command $CMD && \
+   log_info "Connect: ssh -l user 127.0.0.1 -p ${PORT}"   
+else
+   print_help
+fi
+
+
+
