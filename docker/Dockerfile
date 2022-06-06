@@ -4,10 +4,12 @@ RUN apt-get update && apt-get install -y \
         openssh-server \
         sudo \
         tmux \
-        cmake
+        cmake \
+        vim \
+        git
 
 RUN /usr/bin/ssh-keygen -A 
-RUN useradd -rms /bin/tmux -u 1000 user
+RUN useradd -rms /bin/tmux -u 1000 -G sudo user
 RUN echo 'user:user1234' | chpasswd
 
 RUN service ssh start
