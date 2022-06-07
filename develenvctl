@@ -2,6 +2,8 @@
 #Action variables
 BUILD=0
 RUN=0
+START=0
+STOP=0
 SHOW_HELP=0
 DEBUG=0
 
@@ -46,12 +48,26 @@ run_command() {
    return $ret
 }
 
+container_exist() {
+   return $(docker ps -a | grep -q $1)
+}
+
+container_running() {
+   return $(docker ps | grep -q $1)
+}
+
+get_container_binding_port() {
+   docker container port $1 | grep -Eo '[0-9]+$'
+}
+
 print_help() {
    echo -e "Development environment control script\n"
    echo -e "Usage:\t$0 COMMAND [OPTIONS]\n"
    echo -e "Commands:"
    echo -e "  build\t\tBuild devel environment image"
    echo -e "  run\t\tRun the devel environment container"
+   echo -e "  start\t\tStart devel environment created container"
+   echo -e "  stop\t\tStop devel environment container"
    echo -e "\nbuild options:"
    echo -e "  -t|--tag)\tAssign image tag. Default ${IMAGE_TAG}"
    echo -e "\nrun options:"
@@ -60,13 +76,15 @@ print_help() {
    echo -e "  -p|--port)\tSSH port forwarding. Default ${PORT}"
    echo -e "  -v|--vol)\tBinding path. Default ${WORKSPACE_DIR}"
    echo -e "\nglobal options:"
-   echo -e "  -d|--debug)\tEnble debug. Default ${DEBUG}"
+   echo -e "  -d|--debug)\tEnable debug. Default ${DEBUG}"
 }
 
 while [[ "$#" -gt 0 ]] ; do
    case $1 in
       build ) BUILD=1 ;;
       run ) RUN=1 ;;
+      start ) START=1 ;;
+      stop ) STOP=1 ;;
       -t | --tag ) shift ; IMAGE_TAG=$1 ;;
       -n | --name ) shift ; CONTAINER_NAME=$1 ;;
       -p | --port ) shift ; PORT=$1 ;;
@@ -96,7 +114,28 @@ elif [[ ${RUN} -eq 1 ]] ; then
       --name ${CONTAINER_NAME} \
       ${IMAGE_TAG}"
    run_command $CMD && \
-   log_info "Connect: ssh -l user 127.0.0.1 -p ${PORT}"   
+   log_info "Connect: ssh -l user 127.0.0.1 -p ${PORT}"
+
+elif [[ ${START} -eq 1 ]] ; then
+   log_info "Starting container ${CONTAINER_NAME}"
+   if container_exist ${CONTAINER_NAME} && ! container_running ${CONTAINER_NAME} ; then
+      CMD="docker container start \
+         ${CONTAINER_NAME}"
+      run_command $CMD && \
+      log_info "Connect: ssh -l user 127.0.0.1 -p $(get_container_binding_port ${CONTAINER_NAME})"
+   else
+      log_info "Cannot start ${CONTAINER_NAME}"
+   fi
+
+elif [[ ${STOP} -eq 1 ]] ; then
+   log_info "Stopping container ${CONTAINER_NAME}"
+   if container_exist ${CONTAINER_NAME} && container_running ${CONTAINER_NAME} ; then
+      CMD="docker container stop \
+         ${CONTAINER_NAME}"
+      run_command $CMD
+   else
+      log_info "Cannot stop ${CONTAINER_NAME}"
+   fi
 else
    print_help
 fi
