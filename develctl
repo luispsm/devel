@@ -4,6 +4,7 @@ BUILD=0
 RUN=0
 START=0
 STOP=0
+STATUS=0
 SHOW_HELP=0
 DEBUG=0
 
@@ -68,6 +69,7 @@ print_help() {
    echo -e "  run\t\tRun the devel environment container"
    echo -e "  start\t\tStart devel environment created container"
    echo -e "  stop\t\tStop devel environment container"
+   echo -e "  status\t\tStatus of devel environment container"
    echo -e "\nbuild options:"
    echo -e "  -t|--tag)\tAssign image tag. Default ${IMAGE_TAG}"
    echo -e "\nrun options:"
@@ -85,6 +87,7 @@ while [[ "$#" -gt 0 ]] ; do
       run ) RUN=1 ;;
       start ) START=1 ;;
       stop ) STOP=1 ;;
+      status ) STATUS=1 ;;
       -t | --tag ) shift ; IMAGE_TAG=$1 ;;
       -n | --name ) shift ; CONTAINER_NAME=$1 ;;
       -p | --port ) shift ; PORT=$1 ;;
@@ -135,6 +138,13 @@ elif [[ ${STOP} -eq 1 ]] ; then
       run_command $CMD
    else
       log_info "Cannot stop ${CONTAINER_NAME}"
+   fi
+elif [[ ${STATUS} -eq 1 ]] ; then
+   log_info "Devel container \"${CONTAINER_NAME}\" status"
+   if container_exist ${CONTAINER_NAME} && container_running ${CONTAINER_NAME} ; then
+      log_info "Running"
+   else
+      log_info "Not running"
    fi
 else
    print_help

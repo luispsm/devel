@@ -6,7 +6,8 @@ RUN apt-get update && apt-get install -y \
         tmux \
         cmake \
         vim \
-        git
+        git \
+        g++
 
 RUN /usr/bin/ssh-keygen -A 
 RUN useradd -rms /bin/tmux -u 1000 -G sudo user
