@@ -1,0 +1,13 @@
+alias pd='pushd > /dev/null'
+alias pp='popd > /dev/null'
+alias ds='dirs -v'
+alias ll='ls -lhtr ; date'
+
+function is_interactive_shell() {
+    [[ $- == *i* ]] || [[ -n "$PS1" ]]
+}
+
+if is_interactive_shell ; then
+    bind '"\en": history-search-backward'
+    bind '"\em": history-search-forward'
+fi
