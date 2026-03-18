@@ -1,3 +1,98 @@
 // Place your key bindings in this file to override the defaults
 [
+{
+  "key": "ctrl+b",
+  "command": "extension.multiCommand.execute",
+  "args": {
+    "sequence": [
+      "workbench.action.closeSidebar",
+      "workbench.action.closeAuxiliaryBar",
+      "workbench.action.closePanel"
+    ]
+  },
+  "when": "panelVisible || sideBarVisible || auxiliaryBarVisible"
+},
+{
+    "key": "ctrl+b",
+    "command": "extension.multiCommand.execute",
+    "args": {
+      "sequence": [
+        "workbench.action.toggleSidebarVisibility",
+        "workbench.action.toggleAuxiliaryBar"
+      ]
+    },
+    "when": "!sideBarVisible && !auxiliaryBarVisible"
+},
+{
+    "key": "ctrl+b",
+    "command": "-workbench.action.toggleSidebarVisibility"
+},
+{
+  "key": "ctrl+shift+g",
+  "command": "references-view.findReferences",
+  "when": "editorHasReferenceProvider"
+},
+{
+  "key": "shift+alt+f12",
+  "command": "-references-view.findReferences",
+  "when": "editorHasReferenceProvider"
+},
+{
+  "key": "ctrl+shift+m",
+  "command": "editor.action.toggleMinimap"
+},
+{
+  "key": "ctrl+m",
+  "command": "-workbench.action.toggleSidebarVisibility"
+},
+{
+  "key": "ctrl+m",
+  "command": "workbench.action.toggleEditorWidths"
+},
+{
+  "key": "ctrl+shift+1",
+  "command": "editor.action.quickFix",
+  "when": "editorTextFocus"
+},
+{
+  "key": "ctrl+1",
+  "command": "-editor.action.quickFix",
+  "when": "editorTextFocus"
+},
+{
+  "key": "ctrl+oem_3",
+  "command": "reveal.file"
+},
+{
+  "key": "ctrl+3",
+  "command": "-workbench.action.showCommands"
+},
+{
+  "key": "ctrl+alt+down",
+  "command": "-editor.action.copyLinesDownAction",
+  "when": "editorTextFocus"
+},
+{
+  "key": "ctrl+alt+up",
+  "command": "-editor.action.copyLinesUpAction",
+  "when": "editorTextFocus"
+},
+{
+  "key": "ctrl+alt+m",
+  "command": "workbench.action.toggleMaximizedPanel"
+},
+{
+  "key": "ctrl+shift+b",
+  "command": "-editor.debug.action.toggleBreakpoint",
+  "when": "editorTextFocus"
+},
+{
+  "key": "ctrl+shift+b",
+  "command": "-workbench.action.tasks.build",
+  "when": "taskCommandsRegistered"
+},
+{
+  "key": "ctrl+shift+b",
+  "command": "workbench.view.extension.bookmarks"
+}
 ]
