@@ -1,0 +1,38 @@
+#!/bin/bash
+
+TMUX=$(which tmux)
+SESSION_NAME=development
+
+WINDOW1=workspace
+workspace=$HOME/workspace
+
+WINDOW2=build
+build_tree=$HOME/workspace/build
+
+PROJ_FNC=$workspace/proj-fnc
+
+
+if [ -z "$TMUX" ] ; then
+  echo "Install tmux"
+  exit 1
+fi
+
+alias cls='clear && tmux clear-history'
+alias begin='tmux copy-mode ; tmux-send-keys '\''g'\'''
+
+sessions=$($TMUX ls -F "#{session_name}")
+if grep -q "$SESSION_NAME" <<< "$sessions" ; then
+  $TMUX attach -t $SESSION_NAME
+else
+  # workspace window
+  $TMUX new-session -d -s $SESSION_NAME -n $WINDOW1 -c $workspace
+  $TMUX split-window -h -t "$SESSION_NAME:$WINDOW1" -c $workspace
+
+  # build window
+  $TMUX new-window -t $SESSION_NAME -n $WINDOW2
+  $TMUX split-window -h -t "$SESSION_NAME:$WINDOW2" -c $build_tree
+  $TMUX send-keys -t "$SESSION_NAME:$WINDOW2.0" "bash -c 'source $PROJ_FNC && load-dev-container'" C-m
+
+  # attach to session
+  $TMUX attach -t $SESSION_NAME
+fi
